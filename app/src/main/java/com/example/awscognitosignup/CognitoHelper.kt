@@ -142,4 +142,38 @@ class CognitoHelper {
             return Pair(true,response.challengeName.toString())
         }
     }
+
+    /**
+     * 获取用户信息
+     * @param accessTokenVal 令牌
+     * @return 成功时，UserInformation ，失败时 看错误信息
+     */
+    suspend fun getMyInfo(accessTokenVal: String): Pair<UserInformation?,String> {
+        try {
+            val client = CognitoIdentityProviderClient { region = REGION_ID }
+            val request = GetUserRequest {
+                accessToken = accessTokenVal
+            }
+            val response = client.getUser(request)
+
+            val sub = response.userAttributes?.find { it.name == "sub" }?.value
+            val email = response.userAttributes?.find { it.name == "email" }?.value
+            val nickname = response.userAttributes?.find { it.name == "nickname" }?.value
+            val email_verified =
+                response.userAttributes?.find { it.name == "email_verified" }?.value
+
+            val userInfo = UserInformation(
+                nickname.toString(),
+                email.toString(),
+                sub.toString(),
+                email_verified
+            )
+
+            client.close()
+
+            return Pair(userInfo, "")
+        } catch (ex:Exception) {
+            return Pair(null,ex.toString())
+        }
+    }
 }

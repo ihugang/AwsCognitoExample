@@ -5,16 +5,18 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.awscognitosignup.ui.theme.AwsCognitoSignupTheme
 import kotlinx.coroutines.*
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalComposeUiApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -28,11 +30,15 @@ class MainActivity : ComponentActivity() {
                     var email by remember {mutableStateOf("")}
                     var password by remember {mutableStateOf("")}
                     var code by remember { mutableStateOf("") }
+                    var accesstoken by remember { mutableStateOf("") }
+                    var myInfo by remember { mutableStateOf("") }
+
+                    val keyboardController = LocalSoftwareKeyboardController.current
 
                     Greeting("Android")
 
                     Column {
-                        TextField(value = userName, onValueChange = { userName = it}, label = { Text(text = "请输入姓名") })
+                        TextField(value = userName, onValueChange = { userName = it}, label = { Text(text = "请输入姓名") } )
 
                         TextField(value = email, onValueChange = { email = it}, label = { Text(text = "请输入电邮") })
 
@@ -53,7 +59,7 @@ class MainActivity : ComponentActivity() {
                             Text(text = "注册")
                         }
 
-                        TextField(value = code, onValueChange = { code = it}, label = { Text(text = "邮箱验证码") })
+                        TextField(value = code, onValueChange = { code = it}, label = { Text(text = "邮箱验证码") } )
 
                         Button(onClick = {
                             val exceptionHandler = CoroutineExceptionHandler { context, error ->
@@ -71,18 +77,40 @@ class MainActivity : ComponentActivity() {
 
 
                         Button(onClick = {
-                            val exceptionHandler = CoroutineExceptionHandler { context, error ->
+                            keyboardController?.hide()
+
+                             val exceptionHandler = CoroutineExceptionHandler { context, error ->
                                 // Do what you want with the error
                                 Log.d("register", error.toString())
                             }
                             GlobalScope.launch(exceptionHandler) {
                                 val r = CognitoHelper().login(email,password)
                                 Log.d("register",r.toString())
+                                if (r.first) {
+                                    accesstoken = r.second
+                                }
                             }
 
                         }) {
                             Text(text = "登录")
                         }
+
+                        Button(onClick = {
+                            val exceptionHandler = CoroutineExceptionHandler { context, error ->
+                                // Do what you want with the error
+                                Log.d("register", error.toString())
+                            }
+                            GlobalScope.launch(exceptionHandler) {
+                                val r = CognitoHelper().getMyInfo(accesstoken)
+                                Log.d("register",r.toString())
+                                myInfo = r.toString()
+                            }
+
+                        }) {
+                            Text(text = "获取个人信息")
+                        }
+
+                        Text(myInfo, maxLines = 4)
                     }
                 }
             }
