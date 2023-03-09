@@ -6,6 +6,7 @@ plugins {
 android {
     namespace 'com.example.awscognitosignup'
     compileSdk 33
+    compileSdkPreview 'UpsideDownCake'
 
     defaultConfig {
         applicationId "com.example.awscognitosignup"
@@ -46,7 +47,16 @@ android {
     }
 }
 
+
+
+
 dependencies {
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.0.1")
+
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation "com.github.haroldadmin:NetworkResponseAdapter:5.0.0"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
